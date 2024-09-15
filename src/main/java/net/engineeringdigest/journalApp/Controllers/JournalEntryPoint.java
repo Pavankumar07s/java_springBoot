@@ -1,46 +1,47 @@
 package net.engineeringdigest.journalApp.Controllers;
 
-import net.engineeringdigest.journalApp.entity.JournalENtry;
+import net.engineeringdigest.journalApp.Service.JournalEntryService;
+import net.engineeringdigest.journalApp.entity.JournalEntry;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
-@RestController @RequestMapping("/api/journal")
+@RestController
+@RequestMapping("/api/journal")
 public class JournalEntryPoint {
 
+    @Autowired
+    private JournalEntryService journalEntryService;
 
-    private Map<Long,JournalENtry>JournalEntry=new HashMap<>();
-
+    // GET all journal entries
     @GetMapping
-    public List<JournalENtry> getAll(){
-        return new ArrayList<>(JournalEntry.values());
+    public List<JournalEntry> getAll() {
+        return journalEntryService.getAllEntries();
     }
 
+    // POST a new journal entry
     @PostMapping
-    public boolean createEntry(@RequestBody JournalENtry myENtry){
-        JournalEntry.put(myENtry.getId(),myENtry);
+    public boolean createEntry(@RequestBody JournalEntry myEntry) {
+        journalEntryService.saveEntry(myEntry);
         return true;
     }
 
-    @GetMapping("id/{myId}")
-    public JournalENtry getJournalENtryBYId(@PathVariable Long myId){
-        return JournalEntry.get(myId);
+    // GET a journal entry by ID
+    @GetMapping("/id/{myId}")
+    public JournalEntry getJournalEntryById(@PathVariable String myId) { // String is used for MongoDB IDs
+        return journalEntryService.getEntryById(myId);
     }
 
-    @DeleteMapping("id/{myId}")
-    public JournalENtry delJournalENtryBYId(@PathVariable Long myId){
-        try {
-            return JournalEntry.remove(myId);
-        } catch (RuntimeException e) {
-            throw new RuntimeException(e.getMessage());
-        }
+    // DELETE a journal entry by ID
+    @DeleteMapping("/id/{myId}")
+    public boolean deleteJournalEntryById(@PathVariable String myId) {
+        return journalEntryService.deleteEntryById(myId);
     }
 
-    @PutMapping("id/{myId}")
-    public JournalENtry updateJournalENtryBYId(@PathVariable Long myId,@RequestBody JournalENtry myEntry){
-        return JournalEntry.put(myId,myEntry);
+    // PUT (update) a journal entry by ID
+    @PutMapping("/id/{myId}")
+    public JournalEntry updateJournalEntryById(@PathVariable String myId, @RequestBody JournalEntry myEntry) {
+        return journalEntryService.updateEntry(myId, myEntry);
     }
 }
