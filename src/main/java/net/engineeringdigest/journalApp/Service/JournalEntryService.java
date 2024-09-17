@@ -3,6 +3,8 @@ package net.engineeringdigest.journalApp.Service;
 import net.engineeringdigest.journalApp.Repo.JournalEntryRepo;
 import net.engineeringdigest.journalApp.entity.JournalEntry;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -15,41 +17,45 @@ public class JournalEntryService {
     private JournalEntryRepo journalEntryRepo;
 
     // Save a new journal entry
-    public void saveEntry(JournalEntry journalEntry) {
+    public ResponseEntity<String> saveEntry(JournalEntry journalEntry) {
         journalEntryRepo.save(journalEntry);
+        return new ResponseEntity<>("Journal entry created successfully.", HttpStatus.CREATED);
     }
 
     // Get all journal entries
-    public List<JournalEntry> getAllEntries() {
-        return journalEntryRepo.findAll();
+    public ResponseEntity<List<JournalEntry>> getAllEntries() {
+        List<JournalEntry> entries = journalEntryRepo.findAll();
+        return new ResponseEntity<>(entries, HttpStatus.OK);
     }
 
     // Get a journal entry by ID
-    public JournalEntry getEntryById(String id) {
+    public ResponseEntity<JournalEntry> getEntryById(String id) {
         Optional<JournalEntry> entry = journalEntryRepo.findById(id);
-        return entry.orElse(null); // Return the entry if found, else return null
+        return entry.map(journalEntry -> new ResponseEntity<>(journalEntry, HttpStatus.OK))
+                .orElseGet(() -> new ResponseEntity<>(HttpStatus.NOT_FOUND));
     }
 
     // Delete a journal entry by ID
-    public boolean deleteEntryById(String id) {
+    public ResponseEntity<String> deleteEntryById(String id) {
         Optional<JournalEntry> entry = journalEntryRepo.findById(id);
         if (entry.isPresent()) {
             journalEntryRepo.deleteById(id);
-            return true;
+            return new ResponseEntity<>("Journal entry deleted successfully.", HttpStatus.OK);
         }
-        return false;
+        return new ResponseEntity<>("Journal entry not found.", HttpStatus.NOT_FOUND);
     }
 
     // Update a journal entry by ID
-    public JournalEntry updateEntry(String id, JournalEntry updatedEntry) {
+    public ResponseEntity<JournalEntry> updateEntry(String id, JournalEntry updatedEntry) {
         Optional<JournalEntry> existingEntry = journalEntryRepo.findById(id);
         if (existingEntry.isPresent()) {
             JournalEntry journalEntry = existingEntry.get();
             journalEntry.setTitle(updatedEntry.getTitle());
             journalEntry.setContent(updatedEntry.getContent());
             journalEntry.setDate(updatedEntry.getDate());
-            return journalEntryRepo.save(journalEntry); // Save the updated entry
+            JournalEntry savedEntry = journalEntryRepo.save(journalEntry);
+            return new ResponseEntity<>(savedEntry, HttpStatus.OK);
         }
-        return null;
+        return new ResponseEntity<>(HttpStatus.NOT_FOUND);
     }
 }
