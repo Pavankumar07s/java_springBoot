@@ -1,47 +1,54 @@
 package net.engineeringdigest.journalApp.Controllers;
 
+import net.engineeringdigest.journalApp.Repo.UserEntryRepo;
 import net.engineeringdigest.journalApp.Service.JournalEntryService;
-import net.engineeringdigest.journalApp.entity.JournalEntry;
+import net.engineeringdigest.journalApp.Service.UserEntryService;
+import net.engineeringdigest.journalApp.entity.User;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/journal")
+@RequestMapping("/api/user")
 public class UserController {
 
     @Autowired
+    private UserEntryService userEntryService;
+    @Autowired
     private JournalEntryService journalEntryService;
-
     // GET all journal entries
     @GetMapping
-    public ResponseEntity<List<JournalEntry>> getAll() {
-        return journalEntryService.getAllEntries();
+    public ResponseEntity<List<User>> getAllUser() {
+        return userEntryService.getAllUsers();
     }
 
-    // POST a new journal entry
     @PostMapping
-    public ResponseEntity<String> createEntry(@RequestBody JournalEntry myEntry) {
-        return journalEntryService.saveEntry(myEntry);
+    public void createUser(@RequestBody User user){
+        userEntryService.createUser(user);
     }
-
-    // GET a journal entry by ID
-    @GetMapping("/id/{myId}")
-    public ResponseEntity<JournalEntry> getJournalEntryById(@PathVariable String myId) {
-        return journalEntryService.getEntryById(myId);
-    }
-
-    // DELETE a journal entry by ID
-    @DeleteMapping("/id/{myId}")
-    public ResponseEntity<String> deleteJournalEntryById(@PathVariable String myId) {
-        return journalEntryService.deleteEntryById(myId);
-    }
-
-    // PUT (update) a journal entry by ID
-    @PutMapping("/id/{myId}")
-    public ResponseEntity<JournalEntry> updateJournalEntryById(@PathVariable String myId, @RequestBody JournalEntry myEntry) {
-        return journalEntryService.updateEntry(myId, myEntry);
-    }
+//    @PutMapping("/{userName}")
+//    public ResponseEntity<?> updateUser(@RequestBody User user ,@PathVariable String userName) {
+//        // Find user by username
+////        ResponseEntity<User> userResponse = userEntryService.findUserByUserName(userName);
+////        User userInDB = userResponse.getBody();
+////
+////        // Check if user exists
+////        if (userInDB != null) {
+////            // Update user details
+////            userInDB.setUserName(user.getUserName());
+////            userInDB.setPassword(user.getPassword());
+////
+////            // Save the updated user
+////            userEntryService.save(userInDB);
+////
+////            // Return NO_CONTENT status if successful
+////            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+////        }
+////
+////        // Return NOT_FOUND if user does not exist
+////        return new ResponseEntity<>("User not found", HttpStatus.NOT_FOUND);
+//    }
 }

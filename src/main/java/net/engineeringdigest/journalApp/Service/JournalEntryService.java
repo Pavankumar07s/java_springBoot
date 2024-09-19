@@ -2,6 +2,7 @@ package net.engineeringdigest.journalApp.Service;
 
 import net.engineeringdigest.journalApp.Repo.JournalEntryRepo;
 import net.engineeringdigest.journalApp.entity.JournalEntry;
+import net.engineeringdigest.journalApp.entity.User;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -16,10 +17,22 @@ public class JournalEntryService {
     @Autowired
     private JournalEntryRepo journalEntryRepo;
 
-    // Save a new journal entry
-    public ResponseEntity<String> saveEntry(JournalEntry journalEntry) {
-        journalEntryRepo.save(journalEntry);
-        return new ResponseEntity<>("Journal entry created successfully.", HttpStatus.CREATED);
+    @Autowired
+    private UserEntryService userEntryService;
+
+    // Save a new journal entry for a user
+    public void saveEntry(JournalEntry journalEntry, String userName) {
+        User user = userEntryService.findUserByUserName(userName).getBody();
+        if (user == null) {
+            new ResponseEntity<>("User not found.", HttpStatus.NOT_FOUND);
+            return;
+        }
+
+        JournalEntry savedEntry = journalEntryRepo.save(journalEntry);
+        user.getJournalEntries().add(savedEntry);
+        userEntryService.saveEntry(user);
+
+        new ResponseEntity<>("Journal entry created and assigned to user successfully.", HttpStatus.CREATED);
     }
 
     // Get all journal entries
@@ -36,9 +49,13 @@ public class JournalEntryService {
     }
 
     // Delete a journal entry by ID
-    public ResponseEntity<String> deleteEntryById(String id) {
+    public ResponseEntity<String> deleteEntryById(String id, String userName) {
         Optional<JournalEntry> entry = journalEntryRepo.findById(id);
+        User user = userEntryService.findUserByUserName(userName).getBody();
+
         if (entry.isPresent()) {
+            user.getJournalEntries().removeIf(x->x.getId().equals(id));
+            UserEntryService.saveEntry(user);
             journalEntryRepo.deleteById(id);
             return new ResponseEntity<>("Journal entry deleted successfully.", HttpStatus.OK);
         }
