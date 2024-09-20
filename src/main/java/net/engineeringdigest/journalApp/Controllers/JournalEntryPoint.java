@@ -65,14 +65,14 @@ public class JournalEntryPoint {
 
 
     // DELETE a journal entry by ID
-    @DeleteMapping("/id/userName/{myId}")
+    @DeleteMapping("/id/{userName}/{myId}")
     public ResponseEntity<String> deleteJournalEntryById(@PathVariable String myId,@PathVariable String userName) {
         return journalEntryService.deleteEntryById(myId,userName);
     }
 
     // PUT (update) a journal entry by ID
-    @PutMapping("/id/{myId}")
-    public ResponseEntity<JournalEntry> updateJournalEntryById(@PathVariable String myId, @RequestBody JournalEntry myEntry) {
-        return journalEntryService.updateEntry(myId, myEntry);
+    @PutMapping("/id/{userName}/{myId}")
+    public ResponseEntity<JournalEntry> updateJournalEntryById(@PathVariable String myId, @RequestBody JournalEntry myEntry,@PathVariable String userName) {
+        return journalEntryService.updateEntry(myId, myEntry,userName);
     }
 }

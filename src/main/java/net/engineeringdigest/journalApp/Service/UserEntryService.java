@@ -16,7 +16,7 @@ import java.util.Optional;
 public class UserEntryService {
 
     @Autowired
-    private static UserEntryRepo userEntryRepo;
+    private UserEntryRepo userEntryRepo;
 
     // Save a new User entry
     public void createUser(User entry) {
@@ -61,7 +61,7 @@ public class UserEntryService {
     }
 
     // Save or update an entry
-    public static void saveEntry(User user) {
+    public void saveEntry(User user) {
         userEntryRepo.save(user);
     }
 }
