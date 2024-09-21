@@ -29,26 +29,25 @@ public class UserController {
     public void createUser(@RequestBody User user){
         userEntryService.createUser(user);
     }
-//    @PutMapping("/{userName}")
-//    public ResponseEntity<?> updateUser(@RequestBody User user ,@PathVariable String userName) {
-//        // Find user by username
-////        ResponseEntity<User> userResponse = userEntryService.findUserByUserName(userName);
-////        User userInDB = userResponse.getBody();
-////
-////        // Check if user exists
-////        if (userInDB != null) {
-////            // Update user details
-////            userInDB.setUserName(user.getUserName());
-////            userInDB.setPassword(user.getPassword());
-////
-////            // Save the updated user
-////            userEntryService.save(userInDB);
-////
-////            // Return NO_CONTENT status if successful
-////            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
-////        }
-////
-////        // Return NOT_FOUND if user does not exist
-////        return new ResponseEntity<>("User not found", HttpStatus.NOT_FOUND);
-//    }
+    @PutMapping("/{userName}")
+    public ResponseEntity<?> updateUser(@RequestBody User user ,@PathVariable String userName) {
+        ResponseEntity<User> userResponse = userEntryService.findUserByUserName(userName);
+        User userInDB = userResponse.getBody();
+
+        // Check if user exists
+        if (userInDB != null) {
+            // Update user details
+            userInDB.setUserName(user.getUserName());
+            userInDB.setPassword(user.getPassword());
+
+            // Save the updated user
+            userEntryService.createUser(userInDB);
+
+            // Return NO_CONTENT status if successful
+            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+        }
+
+        // Return NOT_FOUND if user does not exist
+        return new ResponseEntity<>("User not found", HttpStatus.NOT_FOUND);
+    }
 }
