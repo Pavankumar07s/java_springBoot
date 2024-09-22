@@ -65,7 +65,7 @@ public class UserController {
             userInDB.setPassword(user.getPassword());
 
             // Save the updated user
-            userEntryService.createUser(userInDB);
+            userEntryService.createNewUser(userInDB);
             return new ResponseEntity<>("User Updated:", HttpStatus.CREATED);
         } catch (RuntimeException e) {
             // Return NOT_FOUND if user does not exist

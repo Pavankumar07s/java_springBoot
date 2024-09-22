@@ -23,7 +23,7 @@ public class UserEntryService {
 
     private static final PasswordEncoder passwordEncoder=new BCryptPasswordEncoder();
     // Save a new User entry
-    public void createUser(User user) {
+    public void createNewUser(User user) {
         user.setPassword(passwordEncoder.encode(user.getPassword()));
         user.setRoles(Arrays.asList("user"));
         userEntryRepo.save(user);
@@ -67,7 +67,7 @@ public class UserEntryService {
     }
 
     // Save or update an entry
-    public void saveEntry(User user) {
+    public void saveUser(User user) {
         userEntryRepo.save(user);
     }
 }
