@@ -23,6 +23,9 @@ public class JournalEntry {
     private String content;
     private Date date; // Declared date field before methods
 
+    public static void setDate(LocalDateTime now) {
+    }
+
 //    public String getId() {
 //        return id;
 //    }

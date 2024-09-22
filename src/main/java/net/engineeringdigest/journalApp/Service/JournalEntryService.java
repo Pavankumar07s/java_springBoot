@@ -9,6 +9,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -25,13 +26,14 @@ public class JournalEntryService {
     @Transactional
     public ResponseEntity<String> saveEntry(JournalEntry journalEntry, String userName) {
         User user = userEntryService.findUserByUserName(userName).getBody();
+        JournalEntry.setDate(LocalDateTime.now());
         if (user == null) {
             return new ResponseEntity<>("User not found.", HttpStatus.NOT_FOUND);
         }
 
         JournalEntry savedEntry = journalEntryRepo.save(journalEntry);
         user.getJournalEntries().add(savedEntry);
-        userEntryService.saveEntry(user);
+        userEntryService.saveUser(user);
 
         return new ResponseEntity<>("Journal entry created and assigned to user successfully.", HttpStatus.CREATED);
     }
@@ -50,6 +52,7 @@ public class JournalEntryService {
     }
 
     // Delete a journal entry by ID
+    @Transactional
     public ResponseEntity<String> deleteEntryById(String id, String userName) {
         Optional<JournalEntry> entry = journalEntryRepo.findById(id);
         if (!entry.isPresent()) {
@@ -62,20 +65,21 @@ public class JournalEntryService {
         }
 
         user.getJournalEntries().removeIf(x -> x.getId().equals(id));
-        userEntryService.saveEntry(user);
+        userEntryService.saveUser(user);
         journalEntryRepo.deleteById(id);
 
         return new ResponseEntity<>("Journal entry deleted successfully.", HttpStatus.OK);
     }
 
     // Update a journal entry by ID
+    @Transactional
     public ResponseEntity<JournalEntry> updateEntry(String id, JournalEntry updatedEntry, String userName) {
         Optional<JournalEntry> existingEntry = journalEntryRepo.findById(id);
         if (existingEntry.isPresent()) {
             JournalEntry journalEntry = existingEntry.get();
             journalEntry.setTitle(updatedEntry.getTitle());
             journalEntry.setContent(updatedEntry.getContent());
-            journalEntry.setDate(updatedEntry.getDate());
+//            JournalEntry.setDate(updatedEntry.getDate());
             JournalEntry savedEntry = journalEntryRepo.save(journalEntry);
             return new ResponseEntity<>(savedEntry, HttpStatus.OK);
         }
