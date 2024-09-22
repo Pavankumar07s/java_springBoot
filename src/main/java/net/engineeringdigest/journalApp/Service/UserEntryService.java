@@ -7,8 +7,11 @@ import org.bson.types.ObjectId;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
@@ -18,9 +21,12 @@ public class UserEntryService {
     @Autowired
     private UserEntryRepo userEntryRepo;
 
+    private static final PasswordEncoder passwordEncoder=new BCryptPasswordEncoder();
     // Save a new User entry
-    public void createUser(User entry) {
-        userEntryRepo.save(entry);
+    public void createUser(User user) {
+        user.setPassword(passwordEncoder.encode(user.getPassword()));
+        user.setRoles(Arrays.asList("user"));
+        userEntryRepo.save(user);
         new ResponseEntity<>("Journal entry created successfully.", HttpStatus.CREATED);
     }
 
@@ -38,7 +44,7 @@ public class UserEntryService {
     }
 
     // Delete a User entry by ID
-    public ResponseEntity<String> deleteEntryById(ObjectId id) {
+    public ResponseEntity<String> deleteEntryById(String id) {
         Optional<User> entry = userEntryRepo.findById(id);
         if (entry.isPresent()) {
             userEntryRepo.deleteById(id);
