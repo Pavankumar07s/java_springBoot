@@ -1,9 +1,12 @@
 package net.engineeringdigest.journalApp.Service;
 
 import lombok.NonNull;
+import lombok.extern.slf4j.Slf4j;
 import net.engineeringdigest.journalApp.Repo.UserEntryRepo;
 import net.engineeringdigest.journalApp.entity.User;
 import org.bson.types.ObjectId;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -16,18 +19,29 @@ import java.util.List;
 import java.util.Optional;
 
 @Service
+@Slf4j
 public class UserEntryService {
 
     @Autowired
     private UserEntryRepo userEntryRepo;
 
+//    private static final Logger logger= LoggerFactory.getLogger(UserEntryService.class);
     private static final PasswordEncoder passwordEncoder=new BCryptPasswordEncoder();
     // Save a new User entry
     public void createNewUser(User user) {
-        user.setPassword(passwordEncoder.encode(user.getPassword()));
-        user.setRoles(Arrays.asList("user"));
-        userEntryRepo.save(user);
-        new ResponseEntity<>("Journal entry created successfully.", HttpStatus.CREATED);
+        try{
+            user.setPassword(passwordEncoder.encode(user.getPassword()));
+            user.setRoles(Arrays.asList("USER"));
+            userEntryRepo.save(user);
+            new ResponseEntity<>("user created successfully.", HttpStatus.CREATED);
+        } catch (Exception e) {
+            log.error("heheheh for {}",user.getUserName());
+//            logger.info("hehehe");
+//            logger.debug("hohoho");
+//            logger.error("tututu");
+            new ResponseEntity<>("User creation failed.", HttpStatus.NOT_ACCEPTABLE);
+        }
+
     }
 
     // Get all User entries
@@ -69,5 +83,12 @@ public class UserEntryService {
     // Save or update an entry
     public void saveUser(User user) {
         userEntryRepo.save(user);
+    }
+
+    public void saveAdmin(User user) {
+        user.setPassword(passwordEncoder.encode(user.getPassword()));
+        user.setRoles(Arrays.asList("USER","ADMIN"));
+        userEntryRepo.save(user);
+        new ResponseEntity<>("Journal entry created successfully.", HttpStatus.CREATED);
     }
 }
