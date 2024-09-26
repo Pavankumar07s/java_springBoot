@@ -44,18 +44,18 @@ jobs:
           TODAY=$(date -u +"%Y-%m-%d")
 
           # Extract all PRs created today
-          PR_COUNT=$(jq --arg TODAY "$TODAY" '[.[] | select(.created_at | startswith($TODAY))] | length' pr-summary.json)
+          PR_COUNT=$(jq --arg TODAY "$TODAY" '[.[] | select(.created_at | split("T")[0] == $TODAY)] | length' pr-summary.json)
 
           # Extract all merged PRs today
-          MERGED_COUNT=$(jq --arg TODAY "$TODAY" '[.[] | select(.created_at | startswith($TODAY) and .merged != null)] | length' pr-summary.json)
+          MERGED_COUNT=$(jq --arg TODAY "$TODAY" '[.[] | select(.merged_at != null and .created_at | split("T")[0] == $TODAY)] | length' pr-summary.json)
 
           # List of users who created PRs today
           echo "Users who created PRs today:"
-          jq --arg TODAY "$TODAY" '.[] | select(.created_at | startswith($TODAY)) | .user.login' pr-summary.json
+          jq --arg TODAY "$TODAY" '[.[] | select(.created_at | split("T")[0] == $TODAY) | .user.login]' pr-summary.json
 
           # List of users whose PRs were merged today
           echo "Users whose PRs were merged today:"
-          jq --arg TODAY "$TODAY" '.[] | select(.created_at | startswith($TODAY) and .merged != null) | .user.login' pr-summary.json
+          jq --arg TODAY "$TODAY" '[.[] | select(.merged_at != null and .created_at | split("T")[0] == $TODAY) | .user.login]' pr-summary.json
 
           # Output the total count
           echo "Total PRs created today: $PR_COUNT"
