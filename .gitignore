@@ -20,7 +20,6 @@ target/
 *.iml
 *.ipr
 /htmlReport
-application.properties
 ### NetBeans ###
 /nbproject/private/
 /nbbuild/
@@ -34,4 +33,3 @@ build/
 ### VS Code ###
 .vscode/
 ./logs
-./src/main/resources
