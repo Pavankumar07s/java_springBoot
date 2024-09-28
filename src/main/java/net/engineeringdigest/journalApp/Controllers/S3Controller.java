@@ -8,7 +8,10 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
+import java.net.URL;
 import java.nio.file.Files;
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/public/files")
@@ -21,26 +24,45 @@ public class S3Controller {
         this.s3Service = s3Service;
     }
 
+    // 1. Upload endpoint
     @PostMapping("/upload")
-        public ResponseEntity<String> uploadFile(@RequestParam("file") MultipartFile file) {
+    public ResponseEntity<String> uploadFile(@RequestParam("file") MultipartFile file) {
         try {
             String fileName = s3Service.uploadFile(file);
             return ResponseEntity.status(HttpStatus.OK).body("File uploaded successfully: " + fileName);
-        } catch (Exception e){
+        } catch (IOException e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("File upload failed: " + e.getMessage());
         }
     }
 
-    @GetMapping("/download/{fileName}")
-    public ResponseEntity<byte[]> downloadFile(@PathVariable String fileName) {
+    // 2. Generate presigned URL for downloading
+    @GetMapping("/download-url/{fileName}")
+    public ResponseEntity<String> generateDownloadUrl(@PathVariable String fileName) {
+        URL presignedUrl = s3Service.generatePresignedUrl(fileName);
+        return ResponseEntity.status(HttpStatus.OK).body(presignedUrl.toString());
+    }
+
+    // 3. Download and stream file content from S3
+    @GetMapping("/download-stream/{fileName}")
+    public ResponseEntity<byte[]> downloadFileAsStream(@PathVariable String fileName) {
         try {
-            File file = s3Service.downloadFile(fileName);
-            byte[] fileContent = Files.readAllBytes(file.toPath());
-            String filePath= file.getPath();
+            InputStream inputStream = s3Service.downloadFileAsStream(fileName);
+            byte[] fileContent = inputStream.readAllBytes();
+
             return ResponseEntity.ok()
                     .header("Content-Disposition", "attachment; filename=\"" + fileName + "\"")
                     .body(fileContent);
         } catch (IOException e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
         }
-    }}
+    }
+
+
+    @GetMapping("/list")
+    public ResponseEntity<List<String>> listAllObjects() {
+        List<String> objectKeys = s3Service.listAllObjects();
+        return ResponseEntity.status(HttpStatus.OK).body(objectKeys);
+    }
+
+
+}
