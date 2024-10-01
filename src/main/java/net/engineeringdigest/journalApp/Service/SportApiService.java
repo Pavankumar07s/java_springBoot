@@ -3,6 +3,7 @@ package net.engineeringdigest.journalApp.Service;
 import net.engineeringdigest.journalApp.Repo.FootballCategoryRepository;
 import net.engineeringdigest.journalApp.entity.FootballCategory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.*;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
@@ -13,11 +14,11 @@ import reactor.core.publisher.Mono;
 public class SportApiService {
 
     private final RestTemplate restTemplate = new RestTemplate();
-
+    @Value("${x-rapidapi-key}") public String key;
     public ResponseEntity<String> makeGetRequestWithHeaders(String url) {
         // Set up the headers
         HttpHeaders headers = new HttpHeaders();
-        headers.set("x-rapidapi-key", "3dce9a4405msh2c075ea66c19e31p1ea634jsnbe2025e47b4f");
+        headers.set("x-rapidapi-key", key);
         headers.set("x-rapidapi-host", "linkedin-data-api.p.rapidapi.com");
         headers.set("Accept", "application/json");
 
@@ -38,7 +39,7 @@ public class SportApiService {
     public ResponseEntity<String> makePostRequest(String url,String body) {
         // Set up the headers
         HttpHeaders headers = new HttpHeaders();
-        headers.set("x-rapidapi-key", "3dce9a4405msh2c075ea66c19e31p1ea634jsnbe2025e47b4f");
+        headers.set("x-rapidapi-key", key);
         headers.set("x-rapidapi-host", "linkedin-data-api.p.rapidapi.com");
         headers.set("Content-Type", "application/json");
 
