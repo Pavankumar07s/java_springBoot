@@ -21,7 +21,8 @@ public class UserScheduler {
         List<User> users = userRepository.getUserForSA();
         for (User user : users) {
             List<JournalEntry> journalEntries = user.getJournalEntries();
-            emailService.sendEmail(user.getEmail(),"hehe header hai","yaha hai body");
+//            emailService.sendEmail(user.getEmail(),"hehe header hai","yaha hai body");
+            emailService.sendEmailUsingSendGRid(user.getEmail(),"hehe header hai","yaha hai body");
         }
     }
 }
