@@ -1,9 +1,9 @@
 package net.engineeringdigest.journalApp.Service;
+
 import com.amazonaws.HttpMethod;
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.model.*;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -12,9 +12,6 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -23,8 +20,9 @@ import java.util.stream.Collectors;
 
 @Service
 public class S3Service {
+
     private final AmazonS3 amazonS3;
-    private final String bucketName = "pavanprivateprac.dev"; // You can fetch from application.yml as well
+    private final String bucketName = "pavanprivateprac.dev"; // You can fetch this from application.yml
 
     @Autowired
     public S3Service(AmazonS3 amazonS3) {
@@ -39,6 +37,7 @@ public class S3Service {
         convertedFile.delete();  // Clean up after uploading
         return fileName;
     }
+
     public String uploadFileToFolder(MultipartFile file, String folderName) throws IOException {
         // Convert the MultipartFile to a File
         File convertedFile = convertMultipartFileToFile(file);
@@ -69,7 +68,6 @@ public class S3Service {
         return convertedFile;
     }
 
-
     // 2. Generate a presigned URL for downloading
     public URL generatePresignedUrl(String fileName) {
         Date expiration = new Date();
@@ -85,20 +83,18 @@ public class S3Service {
         return amazonS3.generatePresignedUrl(generatePresignedUrlRequest);
     }
 
-
+    // Generate PreSigned URL
     public String generatePreSignedUrl(String filePath) {
-        // Set expiration time for the pre-signed URL (example: 1 hour)
         Date expiration = new Date();
         long expTimeMillis = expiration.getTime();
         expTimeMillis += 1000 * 60 * 60;  // 1 hour
         expiration.setTime(expTimeMillis);
 
-        // Generate the pre-signed URL
         GeneratePresignedUrlRequest generatePresignedUrlRequest =
                 new GeneratePresignedUrlRequest(bucketName, filePath)
                         .withMethod(HttpMethod.GET)
                         .withExpiration(expiration);
-
+        System.out.println(generatePresignedUrlRequest);
         URL url = amazonS3.generatePresignedUrl(generatePresignedUrlRequest);
         return url.toString();  // Return URL as a string
     }
@@ -108,7 +104,6 @@ public class S3Service {
         S3Object s3Object = amazonS3.getObject(new GetObjectRequest(bucketName, fileName));
         return s3Object.getObjectContent();
     }
-
 
     // Method to list all objects in the S3 bucket
     public List<String> listAllObjects() {
@@ -141,6 +136,7 @@ public class S3Service {
     public boolean doesObjectExist(String fileName) {
         return amazonS3.doesObjectExist(bucketName, fileName);
     }
+
     // Get object metadata (size, content type, etc.) for a given file in S3
     public ObjectMetadata getObjectMetadata(String fileName) {
         return amazonS3.getObjectMetadata(bucketName, fileName);
@@ -150,7 +146,6 @@ public class S3Service {
     public List<Bucket> listAllBuckets() {
         return amazonS3.listBuckets();
     }
-
 
     // List files in a specific folder
     public List<String> listFilesInFolder(String folderName) {
@@ -162,4 +157,13 @@ public class S3Service {
         }
         return fileNames;
     }
+
+    // Get image from S3 as InputStream (using AmazonS3 SDK v1)
+    public InputStream getImageFromS3(String userFolder, String imageName) {
+        S3Object s3Object = amazonS3.getObject(new GetObjectRequest(bucketName, userFolder + "/" + imageName));
+        return s3Object.getObjectContent();
+    }
+
+
+
 }
